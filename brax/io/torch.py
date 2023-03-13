@@ -99,3 +99,40 @@ def _jax_dict_to_torch(
   """Converts a dict of jax.Arrays into a dict of PyTorch tensors."""
   return type(value)(
       **{k: jax_to_torch(v, device=device) for k, v in value.items()})  # type: ignore
+
+
+#-----------------JAX4-----------------
+
+
+@jax_to_torch.register(jax.Array)
+def _array_to_tensor(value: jax.Array,
+                           device: Device = None) -> torch.Tensor:
+  """Converts a Jax DeviceArray into PyTorch Tensor."""
+  dpack = jax_dlpack.to_dlpack(value.astype("float32"))
+  tensor = torch_dlpack.from_dlpack(dpack)
+  if device:
+    return tensor.to(device=device)
+  return tensor
+
+@jax_to_torch.register(abc.Mapping)
+def _jax4_dict_to_torch(
+    value: Dict[str, Union[jax.Array, Any]],
+    device: Device = None) -> Dict[str, Union[torch.Tensor, Any]]:
+  """Converts a dict of Jax Array into a dict of PyTorch tensors."""
+  return type(value)(
+      **{k: jax_to_torch(v, device=device) for k, v in value.items()})  # type: ignore
+
+
+@torch_to_jax.register(torch.Tensor)
+def _tensor_to_jax4(value: torch.Tensor) -> jax.Array:
+  """Converts a PyTorch Tensor into a Jax Array."""
+  tensor = torch_dlpack.to_dlpack(value)
+  tensor = jax_dlpack.from_dlpack(tensor)
+  return tensor
+
+@torch_to_jax.register(abc.Mapping)
+def _torch_dict_to_jax4(
+    value: Dict[str, Union[torch.Tensor, Any]]
+) -> Dict[str, Union[jax.Array, Any]]:
+  """Converts a dict of PyTorch tensors into a dict of Jax DeviceArrays."""
+  return type(value)(**{k: torch_to_jax(v) for k, v in value.items()})  # type: ignore
