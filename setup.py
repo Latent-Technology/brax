@@ -23,7 +23,7 @@ from setuptools import find_packages
 from setuptools import setup
 
 setup(
-    name="brax",
+    name="latent-brax",
     version="0.1.1",
     description=("A differentiable physics engine written in JAX."),
     author="Brax Authors",
