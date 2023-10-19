@@ -24,7 +24,7 @@ from setuptools import setup
 
 setup(
     name="latent-brax",
-    version="0.1.2",
+    version="0.1.1.1",
     description=("A differentiable physics engine written in JAX."),
     author="Brax Authors",
     author_email="no-reply@google.com",
